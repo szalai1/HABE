@@ -8,7 +8,7 @@ hashs.o: hashs.c
 
 run:
 	make -k
-	./app < a.param
+	./crypto < a.param
 	echo "please press ENTER"
 	read a
 
