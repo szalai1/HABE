@@ -1,0 +1,10 @@
+app: main.c
+	 gcc -o app main.c -I ~/.local/include/pbc -L ~/.local/lib -Wl,-rpath ~/.local/lib  -l pbc -l gmp
+run:
+	make -k
+	./app < a.param
+	echo "please press ENTER"
+	read a
+
+check-syntax:
+	gcc -o nul -S ${CHK_SOURCES}
