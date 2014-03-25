@@ -2,65 +2,65 @@
 #include <stdio.h>
 #include <string.h>
 #include <openssl/md5.h>
+#include "hashs.h"
 
-typedef struct string string;
-
-struct string {
-	char* str;
-	size_t size;
-};
-
-string string_init(size_t size) {
-	string ret;
-	ret.str = (char* ) malloc(size);
-	ret.size = size;
-	return ret;	
-}
-
-string string_from_cstring(char* s ) {
-	string ret;
-	ret.size = strlen(s);
-	ret.str = (char*) malloc(ret.size);
-	strcpy(ret.str, s);
-	return ret;
-}
-
-	
-
-
-//generae a 128bit hash from element
-// RETURN 33 bytes long char[]
-char*  hash_to_string(element_t element) {
-	//convert elemnt to sztring
-	int i;
-	char buff[1024];
-	element_snprintf(buff,1024,"%B",element);
-	//printf("%s \n [ %d ] \n\n", buff, strlen(buff));
-
-	
-	unsigned char hash[MD5_DIGEST_LENGTH + 1];
-	char ret[33];
-	MD5((unsigned char*)& buff, strlen(buff), (unsigned char*)&hash);
-	for(i = 0; i < 16; ++i) {
-		sprintf(ret + i*2, "%02x", (unsigned int) hash[i]);
-	}
-	hash[17] = '\0';
-//	printf("%s\n", hash);
-	return ret;
-	
-}
-
-
+typedef struct public_key public_key;
 typedef struct params params;
 
-struct params {
-	element_t generator;
-	element_t n;
+unsigned int CHILDREN_NUM;
+
+
+
+struct public_key {
+	unsigned int* ID_tuple;
+	unsigned int level;	
+};
+
+public_key init_public_key(public_key* parent) {
+	if(parent == NULL) {
+		public_key ret;
+		ret.level = 0;
+		ret.ID_tuple = (unsigned int*) malloc(sizeof(unsigned int));
+		ret.ID_tuple[0] = 0;
+		return ret;
+	}
+	else {
+		public_key ret;
+		ret.level = parent->level + 1;
+		ret.ID_tuple = (unsigned int*) malloc(sizeof(unsigned int) *
+																					(ret.level + 1));
+		int i;
+		for(i = 0; i < ret.level + 1; ++i) {
+			ret.ID_tuple[i] = parent->ID_tuple[i];
+ 		}
+		ret.ID_tuple[ret.level] = CHILDREN_NUM;
+		return ret;	
+	}
+	
+}
+
+void create_DM(element_t MK, public_key p ) {
+	//todo;
+}
+
+
+struct params{
 	element_t P_0;
 	element_t Q_0;
-	
-	
 };
+
+void init_params(params* param, pairing_t* pairing) {
+	element_init_G1(param->P_0, *pairing);
+	element_init_G1(param->Q_0, *pairing);
+}
+
+void SETUP(params* param, element_t* secret_key, pairing_t* pairing) {
+	init_params(param, pairing);
+	element_init_Zr(*secret_key, *pairing);
+	element_random(param->P_0); //setup paramas and the secret key
+	element_random(*secret_key);
+	element_mul(param->Q_0, *secret_key, param->P_0);
+}
 
 
 
@@ -68,7 +68,7 @@ struct params {
 int main(void){
 	pairing_t pairing;
 	char param[1024];
-	char* out;
+	char out[33];
 	size_t count = fread(param, 1, 1024, stdin);
 	if (!count) pbc_die("input error");
 	pairing_init_set_buf(pairing, param, count);
@@ -84,21 +84,14 @@ int main(void){
 	element_init_GT(temp2, pairing);
 	element_init_Zr(secret_key, pairing);
 	element_random(g);
-
+	
+	element_from_hash(g,"ASD",3);
+	H_2(g);
 	element_random(secret_key);
-	
-	
-	element_pow_zn(public_key, g, secret_key);
-	
-	element_from_hash(h, "ABCDEF", 6);
+	params par;
+	init_params(&par, &pairing);
 
-	element_pow_zn(sig, h, secret_key);
-
-	out = hash_to_string(h);
-	printf("%s\n", out);
 	
 	
 	return 0;
 }
-
-
