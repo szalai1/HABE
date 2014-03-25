@@ -3,7 +3,7 @@
 #include <string.h>
 #include <openssl/md5.h>
 #include "hashs.h"
-
+struct params;
 typedef struct public_key public_key;
 typedef struct params params;
 typedef struct Q_tuple Q_tuple;
@@ -16,6 +16,18 @@ struct public_key {
 	unsigned int* ID_tuple;
 	unsigned int level;
 };
+
+struct params{
+	element_t P_0;
+	element_t Q_0;
+};
+
+void init_params(params* param) {
+	element_init_G1(param->P_0, pairing);
+	element_init_G1(param->Q_0, pairing);
+}
+
+
 
 //in case of rootmaster the input parameter !is NULL
 // else parant of next node parameter pointer
@@ -56,7 +68,7 @@ struct Q_tuple {
 
 //init and gen new valaid Q_tuple
 //MALLOC ALERT! use free_Q_tuple
-Q_tuple init_Q_tuple(Q_tuple* parent, element_t mk_i, paramas params) {
+Q_tuple init_Q_tuple(Q_tuple* parent, element_t mk_i, params params) {
 	Q_tuple ret;
 	//set Q = mk_i * P_0
 	element_t Q;
@@ -66,7 +78,7 @@ Q_tuple init_Q_tuple(Q_tuple* parent, element_t mk_i, paramas params) {
 	if(parent == NULL ) {
 		ret.length = 1;
 		ret.Q_tuple = (element_t *) malloc(sizeof(element_t));
-		ret.Q_tuple[0] = params.Q_0;
+		element_set(ret.Q_tuple[0], params.Q_0);
 	}
 	else {
 		int i =0;
@@ -85,38 +97,33 @@ Q_tuple init_Q_tuple(Q_tuple* parent, element_t mk_i, paramas params) {
 	return ret;
 }
 
-vodi free_Q_tuple(Q_tuple tuple) {
+void free_Q_tuple(Q_tuple tuple) {
 	free(tuple.Q_tuple);
 }
 
 struct master_key {
-	elemnt_t mk;
+	element_t* mk;
 	Q_tuple Q_tuple;
-	element_t SK;
-};
+	element_t* S; 
+  };  
 
-
-
-
-
-
-void create_DM(element_t MK, public_key p ) {
-	//todo;
+master_key create_DM(master_key MK, public_key p,params param) {
+	//init masterkey sub variables
+	master_key ret;
+	ret.mk = (element_t* ) malloc(sizeof(element_t));
+	ret.S = (element_t *) malloc(sizeof(element_t));
+	element_init_same_as(*(ret.mk), *(MK.mk));
+	element_init_same_as(*(ret.S),*(MK.S));
+	element_random(*(ret.mk));
+	ret.Q_tuple = init_Q_tuple()
+	
+	
+	
 }
 
-
-struct params{
-	element_t P_0;
-	element_t Q_0;
-};
-
-void init_params(params* param) {
-	element_init_G1(param->P_0, pairing);
-	element_init_G1(param->Q_0, pairing);
-}
 
 void SETUP(params* param, element_t* secret_key) {
-	init_params(param, pairing);
+	init_params(param);
 	element_init_Zr(*secret_key, pairing);
 	element_random(param->P_0); //setup paramas and the secret key
 	element_random(*secret_key);
@@ -150,7 +157,7 @@ int main(void){
 	H_2(g);
 	element_random(secret_key);
 	params par;
-	init_params(&par, pairing);
+	init_params(&par);
 
 
 
