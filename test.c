@@ -62,29 +62,33 @@ int test1() {
 //SETUP test
 void test2() {
 	params param;
-	element_t secret_key;
-	master_key MK = SETUP(&param, &secret_key);
+	master_key MK = SETUP(&param);
 	printf("SETUP OK\n");
 	int i = 0;
 	for(i = 0; i < MK.Q_tuple.length; ++i) {
 		element_printf("%B ", MK.Q_tuple.Q_tuple);
 	}
 	free_params(&param);
-	element_clear(secret_key);
+	
 }
 
 //create_DM test
 //Q_tuple 'else' test
 void test3() {
+	int i;
 	params param;
-	element_t secret_key;
 	public_key root_pk = init_public_key(NULL);
-	master_key root_mk = SETUP(&param, &secret_key);
+	master_key root_mk = SETUP(&param);
 	public_key pk = init_public_key(&root_pk);
 	//create_DM test
-	master_key DM_mk = create_DM(root_mk, )
-	
-	
+	master_key DM_mk = create_DM(root_mk, pk, param );
+	for(i = 0; i < DM_mk.Q_tuple.length; ++i) {
+		element_printf("%B XX \n", DM_mk.Q_tuple.Q_tuple);
+	}
+	free_public_key(&root_pk);
+	free_master_key(root_mk);
+	free_public_key(&pk);
+	free_master_key(DM_mk);	
 }
 
 
@@ -97,9 +101,9 @@ int main() {
 
 	
 	printf("[ T E S T    S T A R T ]\n");
-	test2();
+	test3();
 
-	printf("[  T E S T    E N D    ]\n");
+	printf("\n[  T E S T    E N D    ]\n");
 
 	return 0;
 }
