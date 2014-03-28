@@ -85,10 +85,15 @@ void test3() {
 	for(i = 0; i < DM_mk.Q_tuple.length; ++i) {
 		element_printf("%B XX \n", DM_mk.Q_tuple.Q_tuple);
 	}
+
 	free_public_key(&root_pk);
+	element_printf(" cccccreat_DM : %d\t %B\n ASD\n",DM_mk.Q_tuple.length, DM_mk.Q_tuple.Q_tuple[1]);
 	free_master_key(root_mk);
+	element_printf(" cccccreat_DM : %d\t %B\n ASD\n",DM_mk.Q_tuple.length, DM_mk.Q_tuple.Q_tuple[1]);
 	free_public_key(&pk);
-	free_master_key(DM_mk);	
+	element_printf(" cccccreat_DM : %d\t %B\n ASD\n",DM_mk.Q_tuple.length, DM_mk.Q_tuple.Q_tuple[1]);
+	free_master_key(DM_mk);
+
 }
 
 
