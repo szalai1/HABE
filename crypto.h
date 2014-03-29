@@ -12,9 +12,11 @@ typedef struct public_key public_key;
 typedef struct params params;
 typedef struct Q_tuple Q_tuple;
 typedef struct master_key master_key;
-
+typedef struct  secret_user_keys secret_user_keys;
+typedef struct attribute attribute;
+typedef master_key create_user_returntype;
 pairing_t pairing;
-
+params PARAM;
 unsigned int CHILDREN_NUM;
 
 struct public_key {
@@ -36,7 +38,21 @@ struct master_key {
 	element_t* mk;
 	Q_tuple Q_tuple;
 	element_t* S; 
-  };  
+};
+
+struct attribute{
+  char* name;
+  element_t SK_iua;
+};
+
+struct secret_user_keys {
+Q_tuple Q_tuple;
+element_t SK_a;
+// secret_key SK_u;
+  attribute attribute;
+};
+
+
 
 void init_params(params* param) ;
 
@@ -58,6 +74,7 @@ master_key create_DM(master_key MK, public_key p, params param);
 
 void free_master_key(master_key mk);
 
-master_key SETUP(params* param, element_t* secret_key) ;
+master_key SETUP(params* param) ;
 
+create_user_returntype create_user(master_key MK,public_key  PK_u, attribute a);
 #endif

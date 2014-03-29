@@ -6,7 +6,7 @@
 //H_mki function from the article
 //unique hash function from bit string to Z_r
 //like HAMC H_A(mk_i | MD5(X | mk_i)) where H_A is H_3, mk_i = key
-int H_4(element_t* out, element_t key, char* string ) {
+void H_4(element_t* out, element_t key, char* string ) {
 	int buff_size;
 	//key to string;
 	int element_length = element_length_in_bytes(key);
