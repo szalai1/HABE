@@ -35,7 +35,7 @@ void set_up_domain_manager(domain_manager* who, public_key parent) {
 		who->MK = x.MK;
 		param_copy_PP(&(who->param),ROOT.param);
 		
-		//updateparentchilds
+		//updateparentchildren
 		
 		public_key* temp = (public_key* ) malloc(sizeof(public_key) * (y->number_of_children + 1) );
 		int i;
