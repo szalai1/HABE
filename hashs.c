@@ -50,7 +50,7 @@ char*  H_2(element_t element) {
 	unsigned char hash[MD5_DIGEST_LENGTH];
 	MD5(buff, element_length, hash);
 	//write the hash of string into a string (ret)
-	char* ret = malloc(sizeof(char)*33);
+	char* ret = (char* ) malloc(sizeof(char) * 33);
 	for(i = 0; i < 16; ++i) {
 		sprintf(ret + i*2, "%02x", (unsigned int) hash[i]);
 	}

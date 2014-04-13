@@ -1,10 +1,23 @@
-#include <stdio.h>
+#include "user.h"
+#include "root.h"
+#include "domain_manager.h"
+#include "communication.h"
 #include "crypto.h"
 #include "hashs.h"
-#include "pbc.h"
+#include <pbc.h>
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+int DM_num;
+domain_manager* dms;
+root ROOT;
+int user_num;
+user* users;
+pairing_t pairing;
+
+////////////////////////////////////////////////////////////////////////////////
 //test param and init_params fuctions
 int test1() {
 	CHILDREN_NUM = 0;
@@ -96,17 +109,56 @@ void test3() {
 
 }
 
+void test4() {
+	set_up_comm();
+	user* u1 = users;
+	user* u2 = users  + 1;
+	domain_manager* DM1 = dms;
+	domain_manager* DM2 = dms + 1;
+	domain_manager* DM3 = dms + 2;
+
+	printf("%p", DM1);
+	//root runs setup itsef
+	create_root(&ROOT, "ROOT");
+	init_domain_manager(DM1, "BME");
+	init_domain_manager(DM2, "TTK");
+	init_domain_manager(DM3, "VIK");
+	printf("## I N I T   D O N E ##\n");
+	set_up_domain_manager(DM1, ROOT.pk);
+	set_up_domain_manager(DM2, DM1->pk);
+	set_up_domain_manager(DM3, DM1->pk);
+
+	domain_manager_add_attribute(DM1,  "A(ttribute)");
+	domain_manager_add_attribute(DM2, "Betrum");
+	domain_manager_add_attribute(DM2, "Cetrum");
+	domain_manager_add_attribute(DM2, "Dettrum");
+	domain_manager_add_attribute(DM3, "Etrum");
+	domain_manager_add_attribute(DM3, "Fertum");
+
+	init_user(u2, "Adam");
+	init_user(u1, "Peter");
+
+	
+	
+	
+}
+
+void printpk(public_key pk) {
+	int i;
+	printf("[ ");
+	for(i = 0; i <= pk.level; ++i) {
+		printf(" %d", pk.ID_tuple[i]);
+	}
+	printf(" ] \n");
+}
 
 
 int main() {
-	char param[1024];
-	size_t count = fread(param, 1, 1024, stdin);
-	if (!count) pbc_die("input error");
-	pairing_init_set_buf(pairing, param, count);
+
 
 	
 	printf("[ T E S T    S T A R T ]\n");
-	test3();
+	test4();
 
 	printf("\n[  T E S T    E N D    ]\n");
 
