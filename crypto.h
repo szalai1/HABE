@@ -18,8 +18,7 @@ typedef  struct conjuctive_clouse conjuctive_clouse;
 typedef struct access_control_policy access_control_policy;
 typedef struct secret secret;
 
-params PARAM;
-unsigned int CHILDREN_NUM;
+
 typedef struct domain_manager domain_manager;
 
 //level go from 0;
@@ -40,9 +39,9 @@ struct Q_tuple {
 };
 
 struct master_key {
-	element_t* mk;
+	element_t* mk; // \in Z_q
 	Q_tuple Q_tuple;
-	element_t* S; 
+	element_t* S; // secret point $\in \mathbb{G}_1$
 };
 
 struct attribute{
@@ -62,12 +61,7 @@ struct access_control_policy {
 };
 
 
-struct secret_user_keys {
-Q_tuple Q_tuple;
-element_t SK_a;
-// secret_key SK_u;
- attribute attribute;
-};
+
 
 
 struct secret {
@@ -84,7 +78,6 @@ struct secret {
 #include "domain_manager.h"
 
 void init_params(params* param) ;
-public_key init_public_key(public_key* parent);
 
 public_key init_public_key(public_key* parent);
 
@@ -122,5 +115,7 @@ char* Xor(char* plain, char* xor);
 
 void param_copy_PP(params** dest, params* src);
 void param_copy(params*, params*);
+void free_attribute(attribute* att);
+void Q_tuple_copy(Q_tuple* dest, Q_tuple* src)
 #endif
 

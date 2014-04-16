@@ -17,8 +17,7 @@ A1 A2 O    U  A3
 	 
  */
 pairing_t pairing;
-params PARAM;
-unsigned int CHILDREN_NUM;
+
 
 //master_key is an element from Z_q
 // is an element from G_1
@@ -180,65 +179,92 @@ int check(public_key PK_u, attribute a) {
 }
 
 
-create_user_returntype create_user(master_key MK, public_key  PK_u, attribute a) {
-	//firstly, check the rights to 'a'
-		create_user_returntype ret; 
-	if(check(PK_u, a))  {
-		printf("there is no rights to this attribute: [ -- ]\n");
-		return ret;
-	}
+/* create_user_returntype create_user(master_key MK, public_key  PK_u, attribute a) { */
+/* 	//firstly, check the rights to 'a' */
+/* 		create_user_returntype ret;  */
+/* 	if(check(PK_u, a))  { */
+/* 		printf("there is no rights to this attribute: [ -- ]\n"); */
+/* 		return ret; */
+/* 	} */
 
-	element_t mk_u;
-	element_init_Zr(mk_u, pairing);
-	element_from_hash(mk_u, (char*) PK_u.ID_tuple,
-										sizeof(int) *	(PK_u.level + 1) / sizeof(char) );
+/* 	element_t mk_u; */
+/* 	element_init_Zr(mk_u, pairing); */
+/* 	element_from_hash(mk_u, (char*) PK_u.ID_tuple, */
+/* 										sizeof(int) *	(PK_u.level + 1) / sizeof(char) ); */
 	
-	element_t SK_u;
-	element_init_G1(SK_u, pairing);
-	element_t temp,temp1,temp2;
-	element_init_G1(temp1, pairing);
-	element_init_G1(temp2, pairing);
-	element_init_G1(temp, pairing);
-	element_mul_zn(temp, PARAM.P_0, mk_u);
-	//SK_u = mk_i * mk_u * P_0
-	element_mul_zn(SK_u, temp, *(MK.mk));
-	Q_tuple qtuple;
-	qtuple.length = MK.Q_tuple.length - 1;
-	qtuple.Q_tuple = (element_t* ) malloc(sizeof(element_t) * qtuple.length);
-	int i;
-	for(i = 0; i < qtuple.length; ++i) {
-		element_init_same_as(qtuple.Q_tuple[i], MK.Q_tuple.Q_tuple[i]);
-		element_set(qtuple.Q_tuple[i], MK.Q_tuple.Q_tuple[i]);
+/* 	element_t SK_u; */
+/* 	element_init_G1(SK_u, pairing); */
+/* 	element_t temp,temp1,temp2; */
+/* 	element_init_G1(temp1, pairing); */
+/* 	element_init_G1(temp2, pairing); */
+/* 	element_init_G1(temp, pairing); */
+/* 	element_mul_zn(temp, PARAM.P_0, mk_u); */
+/* 	//SK_u = mk_i * mk_u * P_0 */
+/* 	element_mul_zn(SK_u, temp, *(MK.mk)); */
+/* 	Q_tuple qtuple; */
+/* 	qtuple.length = MK.Q_tuple.length - 1; */
+/* 	qtuple.Q_tuple = (element_t* ) malloc(sizeof(element_t) * qtuple.length); */
+/* 	int i; */
+/* 	for(i = 0; i < qtuple.length; ++i) { */
+/* 		element_init_same_as(qtuple.Q_tuple[i], MK.Q_tuple.Q_tuple[i]); */
+/* 		element_set(qtuple.Q_tuple[i], MK.Q_tuple.Q_tuple[i]); */
+/* 	} //i ll buy you a beer if you read this . szalaipeti.vagyok@gmail.com */
+/* 		element_t P_a; */
+/* 	element_t tempZ; */
+/* 	element_init_Zr(tempZ, pairing); */
+/* 	element_init_G1(P_a, pairing); */
+/* 	H_4(&tempZ, *(MK.mk), a.name); */
+/* 	element_mul_zn(P_a, PARAM.P_0 ,tempZ); */
+/* 	element_t SK_ua; */
+/* 	element_init_G1(SK_ua, pairing); */
+/* 	element_mul_zn(temp2, P_a, mk_u); */
+/* 	element_mul_zn(temp1, temp2, *(MK.mk)); */
+/* 	element_add(SK_ua, *(MK.S), temp1); */
+/* 	//copy to ret */
+/* 	ret.mk = (element_t* ) malloc(sizeof(element_t)); */
+/* 	ret.S = (element_t* ) malloc(sizeof(element_t)); */
+/* 	element_init_G1(*(ret.mk), pairing); */
+/* 	element_init_G1(*(ret.S), pairing); */
+/* 	element_set(*(ret.mk),SK_u ); */
+/* 	element_set(*(ret.S), SK_ua); */
+/* 	ret.Q_tuple = qtuple; */
+/* //clear the temp vars.	 */
+/* 	element_clear(tempZ); */
+/* 	element_clear(temp1); */
+/* 	element_clear(temp); */
+/* 	element_clear(temp2); */
+/* 	element_clear(SK_u); */
+/* 	element_clear(P_a); */
+/* 	element_clear(SK_ua); */
+/* 	element_clear(mk_u); */
+/* 	return ret; */
+/* } */
+
+//return skiu public function it can be computed by ~everybody
+Q_tuple generate_SK_u (domain_manager* dm, public_key user ) {
+	//check
+	Q_tuple ret;
+  ret.Q_tuple = (element_t* ) malloc(sizeof(element_t) * (dm->MK.Q_tuple.length) );
+	int i, j;//copy Qi -1 -et 
+	for (i = 0; i < dm->MK.Q_tuple.length - 1; ++i) {
+		element_init_same_as(ret.Q_tuple[i],dm->MK.Q_tuple[i]);
+		element_set(ret.Q_tuple[i],dm->MK.Q_tuple[i]);
 	}
-		element_t P_a;
-	element_t tempZ;
-	element_init_Zr(tempZ, pairing);
-	element_init_G1(P_a, pairing);
-	H_4(&tempZ, *(MK.mk), a.name);
-	element_mul_zn(P_a, PARAM.P_0 ,tempZ);
-	element_t SK_ua;
-	element_init_G1(SK_ua, pairing);
-	element_mul_zn(temp2, P_a, mk_u);
-	element_mul_zn(temp1, temp2, *(MK.mk));
-	element_add(SK_ua, *(MK.S), temp1);
-	//copy to ret
-	ret.mk = (element_t* ) malloc(sizeof(element_t));
-	ret.S = (element_t* ) malloc(sizeof(element_t));
-	element_init_G1(*(ret.mk), pairing);
-	element_init_G1(*(ret.S), pairing);
-	element_set(*(ret.mk),SK_u );
-	element_set(*(ret.S), SK_ua);
-	ret.Q_tuple = qtuple;
-//clear the temp vars.	
-	element_clear(tempZ);
-	element_clear(temp1);
+	element_t temp, temp1, temp2;
+	element_init_G1(temp2,pairing);
+	element_init_G1(temp1, pairing);
+	element_init_Zr(temp, pairing);
+	H_3(temp, user.ID_tuple, (user.level + 1) * sizeof(unsigned int)/sizeof(char));
+	element_mul_zn(temp1, dm->param->P_0, temp);
+	element_mul(temp2, temp1, dm->MK.mk);
+	element_init_G1(ret.Q_tuple[i], pairing);
+	element_set(ret.Q_tuple[i], temp2);
 	element_clear(temp);
+	element_clear(temp1);
 	element_clear(temp2);
-	element_clear(SK_u);
-	element_clear(P_a);
-	element_clear(SK_ua);
-	element_clear(mk_u);
+	ret.length = dm->MK.Q_tuple.length;
 	return ret;
+	//return SKiu
 }
 
 //return 1 - OK
@@ -292,7 +318,7 @@ void init_attribute(attribute* attr, char* name, domain_manager* owner) {
 	for( i = 0; i <= (owner->pk).level; ++i ) {
 		attr->DM.ID_tuple[i] = owner->pk.ID_tuple[i];
 	}
-	attr->DM.ID_tuple[i] = get_next_id(owner);
+	attr->DM.ID_tuple[i] = get_next_id(& (owner->pk)) ;
 }
 
 
@@ -532,4 +558,42 @@ void param_copy(params* dest, params* src) {
 	element_set(dest->Q_0, src->Q_0);
 	element_init_same_as(dest->P_0, src->P_0);
 	element_set(dest->Q_0, src->P_0);
+}
+
+void attribute_copy(attribute* dest, attribute* src) {
+	dest->name = (char*) malloc(sizeof(char) * strlen(src->name));
+	strcpy(dest->name, src->name);
+	public_key_copy(&(dest->DM), &(src->DM));
+}
+
+void free_attribute(attribute* att) {
+	free_public_key(&(att->DM));
+	free(att->name);
+}
+
+void Q_tuple_copy(Q_tuple* dest, Q_tuple* src) {
+	int i;
+	dest->Q_tuple = (element_t* ) malloc(sizeof(element_t) *
+																			 (src->length));
+	for( i = 0; i < src->length; ++i) {
+		element_init_G1(dest->Q_tuple[i], pairing);
+		element_set(dest->Q_tuple[i], src->Q_tuple[i]);
+	}
+}
+
+void generate_SK_ua (element_t* ret,
+										 domain_manager* dm,
+										 public_key user,
+										 attribute* att) {
+	element_t temp, temp1, temp2, temp3, temp4;
+	element_init_Zr(temp, pairing);
+	element_init_G1(temp1, pairing);
+	element_init_Zr(temp2, pairing);
+	element_init_G1(temp3, pairing);
+	element_init_G1(temp4, pairing);
+	element_from_hash(temp,user.ID_tuple, (user.level + 1) *
+										(sizeof(unsigned int) / sizeof(char)));//H_A(ID_A)
+	element_mul_zn(temp1, dm->param->P_0, temp); //P_a = P_0 * mk_u
+  H_4(temp2, ) //H_mki(IDa) * P_0 = P_a
+	
 }

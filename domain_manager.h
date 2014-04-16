@@ -12,7 +12,7 @@ struct domain_manager {
 	public_key* children_dm;
 	int number_of_children;
 
-	public_key* attributes;
+	attribute* attributes;
 	int number_of_attributes;
 
 	public_key* users;
@@ -22,3 +22,4 @@ struct domain_manager {
 void domain_manager_add_attribute(domain_manager* dm , char* name);
 void init_domain_manager (domain_manager* dm, char* name);
 #endif
+

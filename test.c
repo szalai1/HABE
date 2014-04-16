@@ -20,7 +20,7 @@ pairing_t pairing;
 ////////////////////////////////////////////////////////////////////////////////
 //test param and init_params fuctions
 int test1() {
-	CHILDREN_NUM = 0;
+//	CHILDREN_NUM = 0;
 	int i;
 	public_key RM; // ID = {0}
 	RM.ID_tuple = (unsigned int*) malloc(sizeof(int));
@@ -30,11 +30,12 @@ int test1() {
 	public_key PK2 = init_public_key(&RM); //ID = {0,1}
 	public_key PK3 = init_public_key(&RM); //ID = {0,2}
 	//next level this situation never happend in a real execution 
-	CHILDREN_NUM = 0;
+	//CHILDREN_NUM = 0;
 	public_key pk1 = init_public_key(&PK1); // ID = {0,0,0}
-	CHILDREN_NUM = 0;
+	//CHILDREN_NUM = 0;
 	public_key pk2 = init_public_key(&PK2); // ID = {0,1,,0}
-	CHILDREN_NUM = 0;
+	//
+	//CHILDREN_NUM = 0;
 	public_key pk3 = init_public_key(&PK3); // ID = {0,2,0}
 	public_key pk4 = init_public_key(&PK3); // ID = {0,2,1}
 	printf("\nTEST1\n");
@@ -66,7 +67,7 @@ int test1() {
 	free_public_key(&pk2);
 	free_public_key(&pk3);
 	free_public_key(&pk4);
-	CHILDREN_NUM = 0;
+//	CHILDREN_NUM = 0;
 	return 0;
 }
 

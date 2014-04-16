@@ -20,7 +20,9 @@ void set_up_domain_manager(domain_manager* who, public_key parent) {
 	printf("[ SETUP_DM ");
 	if (parent.level == 0) {
 		printf(" if %s ]\n", who->name);
-		who->pk = init_public_key(&parent);
+		public_key temp = init_public_key(&parent);
+		who->pk.ID_tuple = temp.ID_tuple;
+		who->pk.level = temp.level;
 		who -> MK =  create_DM(ROOT.MK, who->pk, *(ROOT.param));
 		
 		param_copy_PP(&(who->param), ROOT.param);
@@ -30,7 +32,9 @@ void set_up_domain_manager(domain_manager* who, public_key parent) {
 		printf(" else  %s ]\n", who->name);
 		domain_manager x;
 		domain_manager* y = dm_from_publickey(parent);
-		who->pk = init_public_key(&parent);
+		public_key temp1 = init_public_key(&parent);
+		who->pk.ID_tuple = temp1.ID_tuple;
+		who->pk.level = temp1.level;
 		x.MK = create_DM(y->MK, who->pk, *(ROOT.param) );
 		who->MK = x.MK;
 		param_copy_PP(&(who->param),ROOT.param);
@@ -43,7 +47,7 @@ void set_up_domain_manager(domain_manager* who, public_key parent) {
 			public_key_copy(temp + i, y->children_dm  + i);
 		}
 		y->children_dm += 1;
-		public_key_copy(temp + i, who->pk);
+		public_key_copy(temp + i, &(who->pk));
 
 		
 		for(i = 0; i < y->number_of_children  - 1; ++i) {
@@ -55,8 +59,11 @@ void set_up_domain_manager(domain_manager* who, public_key parent) {
 		}
 }
 
-void set_up_user(user* user, public_key parent_dm)  {
-	//todo
+void set_up_user(user* user, public_key parent_pk)  {
+	domain_manager* parent_dm = dm_from_publickey(parent_pk);
+	public_key pk_u = init_public_key(&parent_dm);
+	user->pk = pk_u;
+	create_user_returntype rt = create_user(parent_dm->MK, pk_u, 
 }
 
 int get_next_id(public_key* parent) {
@@ -90,4 +97,27 @@ int pkcomp(public_key a, public_key b) {
 		}
 	}
 	return 1;
+}
+
+void get_params(params* dest) {
+	param_copy(dest, ROOT->param);
+}
+
+user_secret_key add_attribute(public_key pk, attribute* att) {
+	user_secret_key ret;
+	//trick it s just a fake public_key
+	public_key par_pk;
+	par_pk.ID_tuple = att->DM.ID_tuple;
+	par_pk.level = att->DM.level - 1;
+	domain_manager* par = dm_from_publickey(&par_pk);
+	Q_tuple SK_u = generate_SK_u(att_pk ,pk);
+	element_t SK_a;
+	generate_SK_ua(&SK_a, par, pk, att);
+	ret.SK_a = (element_t* ) malloc( sizeof(element_t));
+	ret.number_of_attributes = 1;
+	element_init_G1(ret.SK_a[0], pairing);
+	element_set(ret.SK_a[0], SK_a);
+	element_clear(SK_a);
+	ret.Q_tuple = SK_u;
+	return ret;
 }

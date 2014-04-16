@@ -20,7 +20,7 @@ void H_4(element_t* out, element_t key, char* string ) {
 	element_to_bytes(element_in_bytes, key);
 	element_in_bytes[element_length] = '\0';
 	//concatanation X | mk_i := buff
-	int buff[buff_size];
+	char buff[buff_size];
 	strcpy(buff, string);
 	strcpy(buff + strlen(string), element_in_bytes);
 	buff[strlen(string) + element_length] = '\0';
@@ -56,4 +56,16 @@ char*  H_2(element_t element) {
 	}
 	ret[33] = '\0';
 	return  ret ;
+}
+
+void H_mk(element_t* out,
+					element_t* mk,
+					unsigned int* id_tuple) {
+	
+	
+}
+
+
+void element_from_public_key(element_t* out, public_key pk, element_t* key) {
+	
 }
