@@ -11,8 +11,8 @@
 typedef struct root root;
 typedef struct domain_manager domain_manager;
 struct root {
-public_key pk;
-master_key MK;
+	public_key pk;
+	master_key MK;
 	char* name;
 	params* param;
 	public_key* DM;

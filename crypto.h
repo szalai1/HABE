@@ -17,60 +17,69 @@ typedef master_key create_user_returntype;
 typedef  struct conjuctive_clouse conjuctive_clouse;
 typedef struct access_control_policy access_control_policy;
 typedef struct secret secret;
-
+typedef struct U U;
+typedef struct part_of_U part_of_U;
 
 typedef struct domain_manager domain_manager;
 
 //level go from 0;
 //the master_root is on the 0. level
 struct public_key {
-	unsigned int level;
-		unsigned int* ID_tuple;
+  unsigned int level;
+  unsigned int* ID_tuple;
 };
 
 struct params{
-	element_t P_0;
-	element_t Q_0;
+  element_t P_0;
+  element_t Q_0;
 };
 
 struct Q_tuple {
-	element_t* Q_tuple;
-	unsigned int length;
+  element_t* Q_tuple;
+  unsigned int length;
 };
 
 struct master_key {
-	element_t* mk; // \in Z_q
-	Q_tuple Q_tuple;
-	element_t* S; // secret point $\in \mathbb{G}_1$
+  element_t* mk; // \in Z_q
+  Q_tuple Q_tuple;
+  element_t* S; // secret point $\in \mathbb{G}_1$
 };
 
 struct attribute{
   char* name; // standar C-string with '\0'
-	// element_t SK_iua;
-	public_key DM;
+  // element_t SK_iua;
+  public_key DM;
 };
 
 struct conjuctive_clouse {
-	attribute* attributes;
-	unsigned int length;
+  attribute* attributes;
+  unsigned int length;
 };
 
 struct access_control_policy {
-	conjuctive_clouse* CC;
-	unsigned int length;
+  conjuctive_clouse* CC;
+  int length;
 };
 
+struct part_of_U {
+  int length;
+  element_t* array;
+};
 
-
-
+struct U {
+  int length;
+  part_of_U* array;
+};
 
 struct secret {
-	unsigned int N;
-	unsigned int* n;
-	element_t** array;
-	element_t* U_0;
-	char* secret; //standard C string
+  int n_A;
+  access_control_policy A;
+  element_t U_0;
+  U U;
+  char* secret; //standard C string
 };
+
+
 
 #include "root.h"
 #include "user.h"
@@ -95,14 +104,26 @@ void free_params(params* param);
 
 void free_public_key(public_key* pk);
 
+void free_conjuctive_clouse(conjuctive_clouse CC);
 
 void free_public_key(public_key* pk);
 
 void free_Q_tuple(Q_tuple tuple);
 
+void free_part_of_U(part_of_U* pou);
+
+void free_U(U U);
+
+void free_secret(secret* sec);
+
 master_key create_DM(master_key MK, public_key p, params param);
 
 void free_master_key(master_key mk);
+
+void free_access_control_policy(access_control_policy* ac);
+
+void access_control_policy_copy(access_control_policy* dest,
+				access_control_policy* src);
 
 master_key SETUP(params* param) ;
 
@@ -111,11 +132,20 @@ int add_CC(conjuctive_clouse* CC, attribute* attr);
 
 
 
-char* Xor(char* plain, char* xor);
-
+char* Xor(char* plain, char* xor,int len);
+void generate_SK_u (Q_tuple* ret, domain_manager* dm, public_key user );
 void param_copy_PP(params** dest, params* src);
 void param_copy(params*, params*);
-void free_attribute(attribute* att);
-void Q_tuple_copy(Q_tuple* dest, Q_tuple* src)
+void free_attribute(attribute att);
+void Q_tuple_copy(Q_tuple* dest, Q_tuple* src);
+void attribute_copy(attribute* dest, attribute* src);
+void encrypt(secret* out,
+	     user* user,
+	     access_control_policy AC,
+	     char* plain);
+void fill_part_of_U(part_of_U* ,conjuctive_clouse,element_t*);
+int LCM(access_control_policy ac);
+unsigned char* decrypt(secret* sec, user_secret_key* sk);
+int find(secret* sec, user_secret_key* sk) ;
 #endif
 

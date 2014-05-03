@@ -8,6 +8,7 @@ struct domain_manager {
 	char* name;
 	params* param;
 	public_key pk;
+	
 	int id;
 	public_key* children_dm;
 	int number_of_children;
@@ -21,5 +22,6 @@ struct domain_manager {
 
 void domain_manager_add_attribute(domain_manager* dm , char* name);
 void init_domain_manager (domain_manager* dm, char* name);
+void elementsum(domain_manager* dm, element_t* out, conjuctive_clouse cc);
 #endif
 

@@ -20,10 +20,11 @@ void domain_manager_add_attribute(domain_manager* dm , char* name) {
 	dm->attributes = temp;
 	init_attribute(dm->attributes + i, name, dm);
 	printf("[ dom_manager_add DONE ]\n");
+	add_to_db(&att, dm->attributes + i);
 }
 
 void init_domain_manager (domain_manager* dm, char* name) {
-	printf("[ init_domain_managerg \"%s %p\" ]\n", name, dm);
+//	printf("[ init_domain_managerg \"%s %p\" ]\n", name, dm);
 //	dm->name
 	char* x= (char* ) malloc(sizeof(char) * (strlen(name) + 1));
 	dm -> name = x;
@@ -39,6 +40,25 @@ void init_domain_manager (domain_manager* dm, char* name) {
 	dm->id = 0;
 	DM_num++;
 	printf("[ init \"%s\" %p domain manager DONE ]\n", dm->name, dm);
+}
 
-
+void elementsum(domain_manager* dm, element_t* out, conjuctive_clouse cc) {
+  int i;
+  element_init_G1(*out, pairing);
+  element_set0(*out);
+  for(i = 0; i < cc.length; ++i) {
+    element_t tmp;
+    Hmki(&tmp, cc.attributes[i].DM, *(dm->MK.mk));
+    element_printf("mk: %B\n", dm->MK.mk);
+    element_t tmp2;
+    element_init_G1(tmp2, pairing);
+    element_mul_zn(tmp2, dm->param->P_0, tmp);
+    element_add(*out, *out, tmp2);
+    element_clear(tmp);
+    element_printf("\t akt %B\n\t sum%B\n\n", tmp2, *out );
+    element_clear(tmp2);
+    
+    
+  }
+  //  element_printf(" out  %B \n", *out);
 }

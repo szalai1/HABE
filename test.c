@@ -5,7 +5,7 @@
 #include "crypto.h"
 #include "hashs.h"
 #include <pbc.h>
-
+#include <openssl/md5.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +16,36 @@ root ROOT;
 int user_num;
 user* users;
 pairing_t pairing;
+attribute_db att;
 
+
+void printpk(public_key pk) {
+  int i;
+  printf("[ ");
+  for(i = 0; i <= pk.level; ++i) {
+  printf(" %d", pk.ID_tuple[i]);
+}
+printf(" ] \n");
+}
+
+void printhash(unsigned char* s) {
+  int i;
+  printf("[ len:%d ", MD5_DIGEST_LENGTH - 1);
+  for (i = 0; i < MD5_DIGEST_LENGTH - 1; i++){
+    printf ("%02x", s[i]);
+  }
+  printf(" ] \n");
+  printf("[ len:%d ", MD5_DIGEST_LENGTH);
+  for (i = 0; i < MD5_DIGEST_LENGTH; i++){
+    printf ("%02x", s[i]);
+  }
+  printf(" ] \n");
+  printf("[ len:%d ", MD5_DIGEST_LENGTH + 1);
+  for (i = 0; i < MD5_DIGEST_LENGTH + 1; i++){
+    printf ("%02x", s[i]);
+  }
+  printf(" ] \n");
+}
 ////////////////////////////////////////////////////////////////////////////////
 //test param and init_params fuctions
 int test1() {
@@ -111,57 +140,315 @@ void test3() {
 }
 
 void test4() {
-	set_up_comm();
-	user* u1 = users;
-	user* u2 = users  + 1;
-	domain_manager* DM1 = dms;
-	domain_manager* DM2 = dms + 1;
-	domain_manager* DM3 = dms + 2;
-
-	printf("%p", DM1);
-	//root runs setup itsef
-	create_root(&ROOT, "ROOT");
-	init_domain_manager(DM1, "BME");
-	init_domain_manager(DM2, "TTK");
-	init_domain_manager(DM3, "VIK");
-	printf("## I N I T   D O N E ##\n");
-	set_up_domain_manager(DM1, ROOT.pk);
-	set_up_domain_manager(DM2, DM1->pk);
-	set_up_domain_manager(DM3, DM1->pk);
-
-	domain_manager_add_attribute(DM1,  "A(ttribute)");
-	domain_manager_add_attribute(DM2, "Betrum");
-	domain_manager_add_attribute(DM2, "Cetrum");
-	domain_manager_add_attribute(DM2, "Dettrum");
-	domain_manager_add_attribute(DM3, "Etrum");
-	domain_manager_add_attribute(DM3, "Fertum");
-
-	init_user(u2, "Adam");
-	init_user(u1, "Peter");
-
-	
-	
-	
+  set_up_comm(3,2);
+  user* u1 = users;
+  user* u2 = users  + 1;
+  domain_manager* DM1 = dms;
+  domain_manager* DM2 = dms + 1;
+  domain_manager* DM3 = dms + 2;
+  
+  printf("%p", DM1);
+  //root runs setup itsef
+  create_root(&ROOT, "ROOT");
+  init_domain_manager(DM1, "BME");
+  init_domain_manager(DM2, "TTK");
+  init_domain_manager(DM3, "VIK");
+  printf("## I N I T   D O N E ##\n");
+  set_up_domain_manager(DM1, ROOT.pk);
+  set_up_domain_manager(DM2, DM1->pk);
+  set_up_domain_manager(DM3, DM1->pk);
+  
+  domain_manager_add_attribute(DM1,  "A(ttribute)");
+  domain_manager_add_attribute(DM2, "Betrum");
+  domain_manager_add_attribute(DM2, "Cetrum");
+  domain_manager_add_attribute(DM2, "Dettrum");
+  domain_manager_add_attribute(DM3, "Etrum");
+  domain_manager_add_attribute(DM3, "Fertum");
+  
+  attribute atts[5];
+  attribute_copy(atts, DM1->attributes);// A
+  attribute_copy(atts + 1, DM2->attributes);//B
+  attribute_copy(atts + 2, DM2->attributes + 1);//C
+  attribute_copy(atts + 3, DM3->attributes);//D
+  attribute_copy(atts + 4, DM3->attributes + 1);//E
+  init_user(u2, DM2->pk, "Adam");
+  init_user(u1, DM2->pk, "Peter");
+  
+  user_add_attribute(u1, atts->DM);
+  user_add_attribute(u1, atts[1].DM);
+  user_add_attribute(u1, atts[2].DM);
+  user_add_attribute(u1, atts[3].DM);
+  user_add_attribute(u2, atts[3].DM);
+  
 }
 
-void printpk(public_key pk) {
-	int i;
-	printf("[ ");
-	for(i = 0; i <= pk.level; ++i) {
-		printf(" %d", pk.ID_tuple[i]);
-	}
-	printf(" ] \n");
+
+void test5() {
+//hash tests
+  set_up_comm(3,2);
+  public_key A;
+  public_key B;
+  int a[] = {1, 2, 3 ,4};
+  A.ID_tuple = a;
+  A.level = 3;
+  int b[] = {1, 2, 3, 4, 5};
+  B.ID_tuple = b;
+  B.level = 4;
+  element_t x;
+  H_A(&x, A);
+  printpk(A);
+  element_printf("A:\n %B\n",x);
+  element_clear(x);
+  H_A(&x, B);
+  printpk(B);
+  element_printf("B:\n %B\n",x);
+  element_clear(x);
+  B.level -= 1;
+  H_A(&x, B);
+  printpk(B);
+  element_printf("A~B:\n %B\n",x);
+  element_clear(x);
+  H_A(&x, A);
+  printpk(A);
+  element_printf("A:\n %B\n",x);
+  element_clear(x);	
+}
+
+void test6() {
+  set_up_comm(3,2);
+  public_key A;
+  public_key B;
+  int a[] = {1, 2, 3 ,4};
+  A.ID_tuple = a;
+  A.level = 3;
+  int b[] = {2, 2, 3, 4, 5};
+  B.ID_tuple = b;
+  B.level = 4;
+  element_t key;
+  element_init_G1(key,pairing);
+  element_random(key);
+  element_t x;
+  Hmki(&x, A, &key);
+  printpk(A);
+  element_printf("A:\nkey:\n %B \n%B\n",key, x);
+  element_clear(x);
+  Hmki(&x, B, &key);
+  printpk(B);
+  element_printf("B:\nkey:\n %B \n%B\n",key , x);
+  element_clear(x);
+  B.level -= 1;
+  Hmki(&x, B, &key);
+  printpk(B);
+  element_printf("A~B:\nkey:\n %B \n%B\n",key, x);
+  element_clear(x);
+  Hmki(&x, A, &key);
+  printpk(A);
+  element_printf("A:\nkey:\n %B \n%B\n",key,x);
+  element_clear(x);
+}
+
+void test7() {
+ 
+  set_up_comm(3,2);
+ 
+  element_t g; 
+  element_t n, sum;
+  element_init_G1(g, pairing);
+  element_init_G1(n, pairing);
+  element_init_G1(sum, pairing);
+  element_set0(n);
+  
+  element_random(g); 
+  element_add(sum, g, n);
+  unsigned char * s = H_2(g); 
+  printhash(s); 
+  free(s);
+  
+  element_random(g);  
+  s = H_2(g); 
+  printhash(s);
+  s = H_2(sum); 
+  printhash(s);
+  free(s);
+
+}
+
+void test8() {
+  set_up_comm(3,2);
+  element_t a;
+  public_key pk;
+  pk.ID_tuple = (unsigned int*) malloc(sizeof(unsigned int) * 5);
+  pk.level = 4;
+  int i;
+  for(i = 0; i < pk.level; ++i ) {
+    pk.ID_tuple[i] = i * 13 % 7;
+  }
+  H_pk_to_G1(&a, pk);
+  element_printf(" %B \n", a);
+  pk.level = 3;
+  H_pk_to_G1(&a, pk);
+  element_printf(" %B \n", a);
+  pk.level = 3;
+}
+//AC test
+//lcm test
+void test9() {
+  set_up_comm(3,2);
+  user* u1 = users;
+  user* u2 = users  + 1;
+  domain_manager* DM1 = dms;
+  domain_manager* DM2 = dms + 1;
+  domain_manager* DM3 = dms + 2;
+  
+  printf("%p", DM1);
+  //root runs setup itsef
+  create_root(&ROOT, "ROOT");
+  init_domain_manager(DM1, "BME");
+  init_domain_manager(DM2, "TTK");
+  init_domain_manager(DM3, "VIK");
+  printf("## I N I T   D O N E ##\n");
+  set_up_domain_manager(DM1, ROOT.pk);
+  set_up_domain_manager(DM2, DM1->pk);
+  set_up_domain_manager(DM3, DM1->pk);
+  
+  domain_manager_add_attribute(DM1,  "A(ttribute)");
+  domain_manager_add_attribute(DM2, "Betrum");
+  domain_manager_add_attribute(DM2, "Cetrum");
+  domain_manager_add_attribute(DM2, "Dettrum");
+  domain_manager_add_attribute(DM3, "Etrum");
+  domain_manager_add_attribute(DM3, "Fertum");
+  
+  conjuctive_clouse elso;
+  init_conjuctive_clouse(&elso, att.attributes, 1);
+  conjuctive_clouse masodik;
+  init_conjuctive_clouse(&masodik, att.attributes + 1, 3);
+  conjuctive_clouse harmadik;
+  init_conjuctive_clouse(&harmadik, att.attributes + 4, 1);
+  add_CC(&harmadik, att.attributes + 5);
+  
+  access_control_policy ac;
+  ac.length = 0;
+  ac.CC = NULL;
+  add_AC(&ac, &elso);
+  add_AC(&ac, &masodik);
+  add_AC(&ac, &harmadik);
+  
+  printf("%d\n", LCM(ac));
+}
+
+void test10() {
+  char a[] = "halihalihali";
+  char b[] = "asdasdasdasd";
+  char* temp = Xor(a, b, 12);
+  printf("#%s#\n", temp);
+  char* temp2 = Xor(temp, a, 12);
+  printf("#%s#\n", temp2);
+  free(temp);
+  free(temp2);
+}
+
+
+void test11() {
+  set_up_comm(4, 2);
+  user* u1 = users;
+  user* u2 = users  + 1;
+  domain_manager* DM1 = dms;
+  domain_manager* DM2 = dms + 1;
+  domain_manager* DM3 = dms + 2;
+  domain_manager* DM4 = dms + 3;
+  
+  printf("%p", DM1);
+  //root runs setup itsef
+  create_root(&ROOT, "ROOT");
+  init_domain_manager(DM1, "BME");
+  init_domain_manager(DM2, "TTK");
+  init_domain_manager(DM3, "VIK");
+  init_domain_manager(DM4, "alebratanszek");
+
+
+  set_up_domain_manager(DM1, ROOT.pk);
+  set_up_domain_manager(DM2, DM1->pk);
+  set_up_domain_manager(DM3, DM1->pk);
+  set_up_domain_manager(DM4, DM2->pk);
+  
+  domain_manager_add_attribute(DM1,  "A");
+   domain_manager_add_attribute(DM2, "B");
+   domain_manager_add_attribute(DM2, "C");
+   domain_manager_add_attribute(DM2, "D");
+  domain_manager_add_attribute(DM3, "E");
+  domain_manager_add_attribute(DM4, "F");
+  
+  attribute atts[6];
+  attribute_copy(atts, DM1->attributes);// A
+  
+  attribute_copy(atts + 1, DM2->attributes);//B 
+  attribute_copy(atts + 2, DM2->attributes + 1);//C 
+  attribute_copy(atts + 3, DM2->attributes + 2);//D 
+  
+  attribute_copy(atts + 4, DM3->attributes);//E 
+  attribute_copy(atts + 5, DM4->attributes);//f 
+  
+   init_user(u2, DM2->pk, "Adam");
+   init_user(u1, DM4->pk, "Peter");
+   
+   //  user_add_attribute(u1, atts->DM);
+   user_add_attribute(u1, atts[5].DM);
+   // user_add_attribute(u1, atts[2].DM); 
+   // user_add_attribute(u1, atts[3].DM); 
+   // user_add_attribute(u2, atts[3].DM); 
+   
+    conjuctive_clouse elso;
+   init_conjuctive_clouse(&elso, atts, 1);
+   conjuctive_clouse masodik;
+   init_conjuctive_clouse(&masodik, atts + 1, 2);
+     conjuctive_clouse harmadik;
+   init_conjuctive_clouse(&harmadik, atts + 5, 1);
+   add_CC(&harmadik, att.attributes + 5);
+   
+   //  element_printf("p-1xxxxx: %B  \n", DM1->MK.S[0] );
+   access_control_policy ac;
+   ac.length = 0;
+   ac.CC = NULL;
+   add_AC(&ac, &elso);
+   
+   add_AC(&ac, &masodik);
+  add_AC(&ac, &harmadik);
+	
+  char key[16] = "keykeykeykeykeyk";
+  secret sk;
+
+  encrypt(&sk, u2, ac, key );
+  user_decrypt(u1, &sk);
+  int i;
+  element_printf("%B\n", ROOT.MK.S[0]);
+  return;
+  
+  
+}
+
+void testx() {
+  set_up_comm(3,2);
+  element_t a,b,c,d;
+  element_init_G1(a,pairing);
+  element_init_G1(b,pairing);
+  element_init_G1(c,pairing);
+  element_random(a);
+  element_random(b);
+  element_printf("%B\n%B\nXXXXXXX\n", a,b);
+  element_add(a,a,b);
+  element_printf("%B\n%B\b", a,b);
 }
 
 
 int main() {
-
-
+  
+  
 	
-	printf("[ T E S T    S T A R T ]\n");
-	test4();
+  printf("[ T E S T    S T A R T ]\n");
+  printf("%d\n\n", MD5_DIGEST_LENGTH);
+  test11();
 
-	printf("\n[  T E S T    E N D    ]\n");
-
-	return 0;
+  printf("\n[  T E S T    E N D    ]\n");
+  
+  return 0;
 }
