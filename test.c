@@ -404,7 +404,6 @@ void test11() {
      conjuctive_clouse harmadik;
    init_conjuctive_clouse(&harmadik, atts + 5, 1);
    add_CC(&harmadik, att.attributes + 5);
-   
    //  element_printf("p-1xxxxx: %B  \n", DM1->MK.S[0] );
    access_control_policy ac;
    ac.length = 0;
@@ -414,7 +413,7 @@ void test11() {
    add_AC(&ac, &masodik);
   add_AC(&ac, &harmadik);
 	
-  char key[16] = "keykeykeykeykeyk";
+  unsigned char key[16] = "keykeykeykeykeyk";
   secret sk;
 
   encrypt(&sk, u2, ac, key );

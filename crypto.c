@@ -441,7 +441,7 @@ void encrypt(secret* out,
   element_init_GT(e,pairing);
   element_pairing(e, user->param->Q_0, temp2);
   element_printf("#######nencrypt e%B\n", e);
-  char* key = H_2(e);
+  unsigned char* key = H_2(e);
   out->secret = Xor(key, plain, MD5_DIGEST_LENGTH);
   access_control_policy_copy(&(out->A), &AC);
   element_clear(r);
@@ -638,12 +638,9 @@ unsigned char* decrypt(secret* sec, user_secret_key* sk ) {
     for(j = 0; j < cc->length; ++j) {
       if(pkcomp(sk->attribute[i].DM, cc->attributes[j].DM)) {
 	element_add(sum, sum, sk->SK_a[i]);
-	//	element_printf("\n AAAAAA pk %d\n", ,sum );
       }
     }
   }
-  // element_printf("%B ==== %B\n U_0 ?= P_0 %B", sum, sk->SK_a[0], sec->U_0);
-  
   element_t temp1, ctr;
   element_init_GT(ctr, pairing);
   element_init_G1(temp1, pairing);
@@ -685,7 +682,7 @@ unsigned char* decrypt(secret* sec, user_secret_key* sk ) {
   //compute the H_2 hash
   unsigned char* ret = H_2(end);
   element_printf("\n  ######### \ndecrypt  %B \n", end );
-
+  return ret;
 }
 
 

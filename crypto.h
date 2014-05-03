@@ -76,7 +76,7 @@ struct secret {
   access_control_policy A;
   element_t U_0;
   U U;
-  char* secret; //standard C string
+  unsigned char* secret; //standard C string
 };
 
 

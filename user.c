@@ -121,6 +121,9 @@ char* user_decrypt(user* u, secret* sec){
   }
   char* ret; 
   ret = decrypt(sec, u->keys + x);
+  char* fin = Xor(ret, sec->secret, MD5_DIGEST_LENGTH);
+  printf("%s\n", fin);
+  
   
 }
 
